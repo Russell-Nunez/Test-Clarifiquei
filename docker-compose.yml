@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: taskmaster
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./Backend/src/infrastructure/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - taskmaster_network
+
+  backend:
+    build: ./Backend
+    container_name: taskmaster_backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://user:password@db:5432/taskmaster
+      NODE_ENV: development
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./Backend:/app
+    command: ["node", "src/server.js"]
+    networks:
+      - taskmaster_network
+
+  frontend:
+    build:
+      context: ./Frontend/task-management-system
+      dockerfile: Dockerfile
+    container_name: taskmaster_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+    networks:
+      - taskmaster_network
+
+volumes:
+  postgres_data:
+
+networks:
+  taskmaster_network:
+    driver: bridge
