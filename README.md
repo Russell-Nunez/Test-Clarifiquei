@@ -1,4 +1,4 @@
-# **Documentação do Backend - TaskMaster**
+# **Documentação do Projeto - TaskMaster**
 
 ## **1. Estrutura do Backend**
 
